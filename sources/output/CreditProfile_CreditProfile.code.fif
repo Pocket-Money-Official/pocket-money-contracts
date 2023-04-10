@@ -1,0 +1,1004 @@
+ode_modules\\@tact-lang\\compiler\\stdlib\\stdlib.fc` `C:\\Users\\yuria\\projects\\PocketMoney\\pocket-money-contracts\
+ode_modules\\@tact-lang\\compiler\\stdlib\\stdlib_ex.fc` `C:\\Users\\yuria\\projects\\PocketMoney\\pocket-money-contracts\\sources\\output\\CreditProfile_CreditProfile.code.fc` 
+PROGRAM{
+  DECLPROC __tact_verify_address
+  DECLPROC __tact_load_address
+  DECLPROC __tact_load_address_opt
+  DECLPROC __tact_store_address
+  DECLPROC __tact_store_address_opt
+  DECLPROC __tact_my_balance
+  DECLPROC __tact_not_null
+  DECLPROC __tact_context_get
+  DECLPROC __tact_context_get_sender
+  DECLPROC __tact_store_bool
+  DECLPROC __tact_address_eq
+  DECLPROC __tact_string_builder_start
+  DECLPROC __tact_string_builder_start_comment
+  DECLPROC __tact_string_builder_end
+  DECLPROC __tact_string_builder_append
+  DECLPROC __gen_read_Deploy
+  DECLPROC __gen_write_DeployOk
+  DECLPROC __gen_writecell_DeployOk
+  DECLPROC __gen_read_Init
+  DECLPROC __gen_read_GetStaticData
+  DECLPROC __gen_read_ProveOwnership
+  DECLPROC __gen_read_RequestOwner
+  DECLPROC __gen_read_Destroy
+  DECLPROC __gen_read_ChangeAuthority
+  DECLPROC __gen_read_Revoke
+  DECLPROC __gen_write_ReportStaticData
+  DECLPROC __gen_writecell_ReportStaticData
+  DECLPROC __gen_write_OwnershipProof
+  DECLPROC __gen_writecell_OwnershipProof
+  DECLPROC __gen_write_OwnerInfo
+  DECLPROC __gen_writecell_OwnerInfo
+  DECLPROC __gen_write_Excesses
+  DECLPROC __gen_writecell_Excesses
+  DECLPROC __gen_write_CreditProfile
+  DECLPROC __gen_read_CreditProfile
+  DECLPROC __gen_Context_get_value
+  DECLPROC __gen_NftData_to_external
+  DECLPROC __gen_read_$init$CreditProfile
+  DECLPROC $__gen_CreditProfile_init
+  DECLPROC __gen_load_CreditProfile
+  DECLPROC __gen_store_CreditProfile
+  DECLPROC $emptyCell
+  DECLPROC $send
+  DECLPROC __gen_constructor_SendParameters$bounce_to_value_mode_body
+  DECLPROC $reply
+  DECLPROC $__gen_String_asComment
+  DECLPROC __gen_constructor_Excesses$queryId
+  DECLPROC __gen_constructor_DeployOk$queryId
+  DECLPROC $__gen_CreditProfile_insertContent
+  DECLPROC __gen_constructor_NftData$isInitialized_index_collectionAddress_ownerAddress_individualContent
+  DECLPROC $__gen_CreditProfile_get_nft_data
+  102351 DECLMETHOD $__gen_get_get_nft_data
+  DECLPROC $__gen_CreditProfile_get_authority_address
+  84760 DECLMETHOD $__gen_get_get_authority_address
+  DECLPROC $__gen_CreditProfile_get_revoked_time
+  97667 DECLMETHOD $__gen_get_get_revoked_time
+  DECLPROC __gen_constructor_SendParameters$to_value_mode_body
+  DECLPROC $__gen_CreditProfile_receive_Init
+  DECLPROC __gen_constructor_ReportStaticData$queryId_index_collection
+  DECLPROC $__gen_CreditProfile_receive_GetStaticData
+  DECLPROC __gen_constructor_OwnershipProof$queryId_itemId_owner_data_revokedAt_content
+  DECLPROC $__gen_CreditProfile_receive_ProveOwnership
+  DECLPROC $__gen_CreditProfile_receive_Destroy
+  DECLPROC $__gen_CreditProfile_receive_ChangeAuthority
+  DECLPROC $__gen_CreditProfile_receive_Revoke
+  DECLPROC __gen_constructor_OwnerInfo$queryId_itemId_initiator_owner_data_revokedAt_content
+  DECLPROC $__gen_CreditProfile_receive_RequestOwner
+  DECLPROC $__gen_CreditProfile_receive_Deploy
+  DECLPROC __gen_router_CreditProfile
+  DECLPROC recv_internal
+  113617 DECLMETHOD supported_interfaces
+  DECLPROC get_abi_ipfs
+  DECLPROC lazy_deployment_completed
+  DECLGLOBVAR __tact_context
+  DECLGLOBVAR __tact_context_sender
+  DECLGLOBVAR __tact_context_sys
+  __tact_verify_address PROCINLINE:<{
+    DUP
+    SBITS
+    267 PUSHINT
+    EQUAL
+    136 THROWIFNOT
+    DUP
+    11 PLDU
+    DUP
+    10 PUSHPOW2
+    EQUAL
+    OVER
+    1279 PUSHINT
+    EQUAL
+    OR
+    136 THROWIFNOT
+    10 PUSHPOW2
+    EQUAL
+    137 THROWIFNOT
+  }>
+  __tact_load_address PROCINLINE:<{
+    LDMSGADDR
+    SWAP
+    __tact_verify_address INLINECALLDICT
+  }>
+  __tact_load_address_opt PROCINLINE:<{
+    LDMSGADDR
+    OVER
+    2 PLDU
+    0 NEQINT
+    IF:<{
+      SWAP
+      __tact_verify_address INLINECALLDICT
+    }>ELSE<{
+      NIP
+      PUSHNULL
+    }>
+  }>
+  __tact_store_address PROCINLINE:<{
+    __tact_verify_address INLINECALLDICT
+    STSLICER
+  }>
+  __tact_store_address_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      0 PUSHINT
+      SWAP
+      2 STU
+    }>ELSE<{
+      __tact_store_address INLINECALLDICT
+    }>
+  }>
+  __tact_my_balance PROCINLINE:<{
+    BALANCE
+    FIRST
+  }>
+  __tact_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+  }>
+  __tact_context_get PROCINLINE:<{
+    __tact_context GETGLOB
+    4 UNTUPLE
+  }>
+  __tact_context_get_sender PROCINLINE:<{
+    __tact_context_sender GETGLOB
+  }>
+  __tact_store_bool PROCINLINE:<{
+    SWAP
+    1 STI
+  }>
+  __tact_address_eq PROCINLINE:<{
+    SDEQ
+  }>
+  __tact_string_builder_start PROCINLINE:<{
+    NIL
+    SWAP
+    TPUSH
+    PUSHNULL
+    TPUSH
+  }>
+  __tact_string_builder_start_comment PROCINLINE:<{
+    NEWC
+    0 PUSHINT
+    SWAP
+    32 STU
+    __tact_string_builder_start INLINECALLDICT
+  }>
+  __tact_string_builder_end PROCINLINE:<{
+    UNCONS
+    SWAP
+    ENDC
+    WHILE:<{
+      OVER
+      ISNULL
+      NOT
+    }>DO<{
+      SWAP
+      UNCONS
+      -ROT
+      STREF
+      ENDC
+    }>
+    NIP
+  }>
+  __tact_string_builder_append PROCREF:<{
+    DUP
+    SREFS
+    OVER
+    SBITS
+    WHILE:<{
+      DUP
+      0 GTINT
+      s2 PUSH
+      0 GTINT
+      OR
+    }>DO<{
+      s0 s3 XCHG
+      UNCONS
+      127 PUSHINT
+      s2 PUSH
+      BBITS
+      3 RSHIFT#
+      SUB
+      s0 s5 XCHG
+      3 RSHIFT#
+      s5 s5 XCPU
+      MIN
+      DUP
+      0 GTINT
+      IF:<{
+        DUP
+        3 LSHIFT#
+        s1 s5 XCHG
+        LDSLICEX
+        s3 s3 XCHG2
+        STSLICER
+        s0 s1 s4 XCHG3
+      }>
+      -ROT
+      CONS
+      s4 s1 PUSH2
+      SUB
+      0 GTINT
+      IF:<{
+        NEWC
+        SWAP
+        CONS
+        s4 s4 XCHG2
+        SUB
+        3 LSHIFT#
+      }>ELSE<{
+        NIP
+        s3 POP
+        0 GTINT
+        IF:<{
+          LDREF
+          DROP
+          CTOS
+          DUP
+          SREFS
+          OVER
+          SBITS
+        }>ELSE<{
+          0 PUSHINT
+          DUP
+        }>
+      }>
+    }>
+    3 BLKDROP
+  }>
+  __gen_read_Deploy PROCINLINE:<{
+    32 LDU
+    SWAP
+    2490013878 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    64 LDU
+    SWAP
+  }>
+  __gen_write_DeployOk PROCINLINE:<{
+    2952335191 PUSHINT
+    ROT
+    32 STU
+    64 STU
+  }>
+  __gen_writecell_DeployOk PROCINLINE:<{
+    NEWC
+    SWAP
+    __gen_write_DeployOk INLINECALLDICT
+    ENDC
+  }>
+  __gen_read_Init PROCINLINE:<{
+    32 LDU
+    SWAP
+    2169787220 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    64 LDU
+    LDGRAMS
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    s1 s4 XCHG
+    s3 s3 s0 XCHG3
+  }>
+  __gen_read_GetStaticData PROCINLINE:<{
+    32 LDU
+    SWAP
+    801842850 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    64 LDU
+    SWAP
+  }>
+  __gen_read_ProveOwnership PROCINLINE:<{
+    32 LDU
+    SWAP
+    81711432 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    64 LDU
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDREF
+    1 LDI
+    4 -ROLL
+  }>
+  __gen_read_RequestOwner PROCINLINE:<{
+    32 LDU
+    SWAP
+    3502489578 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    64 LDU
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDREF
+    1 LDI
+    4 -ROLL
+  }>
+  __gen_read_Destroy PROCINLINE:<{
+    32 LDU
+    SWAP
+    520377210 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    64 LDU
+    SWAP
+  }>
+  __gen_read_ChangeAuthority PROCINLINE:<{
+    32 LDU
+    SWAP
+    2458907371 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    64 LDU
+    __tact_load_address INLINECALLDICT
+    s1 s2 XCHG
+  }>
+  __gen_read_Revoke PROCINLINE:<{
+    32 LDU
+    SWAP
+    1871312355 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    64 LDU
+    SWAP
+  }>
+  __gen_write_ReportStaticData PROCINLINE:<{
+    2339837749 PUSHINT
+    s0 s4 XCHG2
+    32 STU
+    s1 s2 XCHG
+    64 STU
+    256 STU
+    SWAP
+    __tact_store_address INLINECALLDICT
+  }>
+  __gen_writecell_ReportStaticData PROCINLINE:<{
+    NEWC
+    3 -ROLL
+    __gen_write_ReportStaticData INLINECALLDICT
+    ENDC
+  }>
+  __gen_write_OwnershipProof PROCREF:<{
+    86296494 PUSHINT
+    s0 s7 XCHG2
+    32 STU
+    s1 s5 XCHG
+    64 STU
+    s1 s3 XCHG
+    256 STU
+    SWAP
+    __tact_store_address_opt INLINECALLDICT
+    STREF
+    64 STU
+    OVER
+    ISNULL
+    NOT
+    IF:<{
+      TRUE
+      SWAP
+      1 STI
+      STREF
+    }>ELSE<{
+      FALSE
+      s2 POP
+      1 STI
+    }>
+  }>
+  __gen_writecell_OwnershipProof PROCINLINE:<{
+    NEWC
+    6 -ROLL
+    __gen_write_OwnershipProof INLINECALLDICT
+    ENDC
+  }>
+  __gen_write_OwnerInfo PROCREF:<{
+    232130531 PUSHINT
+    s0 s8 XCHG2
+    32 STU
+    s1 s6 XCHG
+    64 STU
+    s1 s4 XCHG
+    256 STU
+    ROT
+    __tact_store_address INLINECALLDICT
+    SWAP
+    __tact_store_address_opt INLINECALLDICT
+    STREF
+    64 STU
+    OVER
+    ISNULL
+    NOT
+    IF:<{
+      TRUE
+      SWAP
+      1 STI
+      STREF
+    }>ELSE<{
+      FALSE
+      s2 POP
+      1 STI
+    }>
+  }>
+  __gen_writecell_OwnerInfo PROCINLINE:<{
+    NEWC
+    7 -ROLL
+    __gen_write_OwnerInfo INLINECALLDICT
+    ENDC
+  }>
+  __gen_write_Excesses PROCINLINE:<{
+    3576854235 PUSHINT
+    ROT
+    32 STU
+    64 STU
+  }>
+  __gen_writecell_Excesses PROCINLINE:<{
+    NEWC
+    SWAP
+    __gen_write_Excesses INLINECALLDICT
+    ENDC
+  }>
+  __gen_write_CreditProfile PROCINLINE:<{
+    s5 s6 XCHG2
+    1 STI
+    s1 s3 XCHG
+    256 STU
+    SWAP
+    __tact_store_address INLINECALLDICT
+    SWAP
+    __tact_store_address_opt INLINECALLDICT
+    NEWC
+    ROT
+    __tact_store_address_opt INLINECALLDICT
+    s1 s2 XCHG
+    64 STU
+    ENDC
+    SWAP
+    STREF
+  }>
+  __gen_read_CreditProfile PROCINLINE:<{
+    1 LDI
+    256 LDU
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address_opt INLINECALLDICT
+    SWAP
+    LDREF
+    SWAP
+    CTOS
+    __tact_load_address_opt INLINECALLDICT
+    SWAP
+    64 LDU
+    DROP
+    s2 s6 XCHG
+    s2 s5 XCHG
+    s2 s4 XCHG
+    s2 s3 XCHG
+  }>
+  __gen_Context_get_value PROCINLINE:<{
+    s1 s3 XCHG
+    3 BLKDROP
+  }>
+  __gen_NftData_to_external PROCINLINE:<{
+  }>
+  __gen_read_$init$CreditProfile PROCINLINE:<{
+    257 PUSHINT
+    LDIX
+    __tact_load_address INLINECALLDICT
+    s1 s2 XCHG
+  }>
+  $__gen_CreditProfile_init PROCREF:<{
+    PUSHNULL
+    PUSHNULL
+    FALSE
+    4 -ROLL
+    0 PUSHINT
+  }>
+  __gen_load_CreditProfile PROCINLINE:<{
+    c4 PUSH
+    CTOS
+    LDREF
+    SWAP
+    __tact_context_sys SETGLOB
+    1 LDI
+    SWAP
+    IF:<{
+      __gen_read_CreditProfile INLINECALLDICT
+      1 6 BLKDROP2
+    }>ELSE<{
+      MYADDR
+      11 PLDU
+      10 PUSHPOW2
+      EQUAL
+      137 THROWIFNOT
+      __gen_read_$init$CreditProfile INLINECALLDICT
+      s0 s2 XCHG
+      ENDS
+      SWAP
+      $__gen_CreditProfile_init INLINECALLDICT
+    }>
+  }>
+  __gen_store_CreditProfile PROCINLINE:<{
+    NEWC
+    __tact_context_sys GETGLOB
+    SWAP
+    STREF
+    TRUE
+    SWAP
+    1 STI
+    6 -ROLL
+    __gen_write_CreditProfile INLINECALLDICT
+    ENDC
+    c4 POP
+  }>
+  $emptyCell PROCINLINE:<{
+    NEWC
+    ENDC
+  }>
+  $send PROCINLINE:<{
+    NEWC
+    1 PUSHINT
+    SWAP
+    2 STI
+    s0 s7 XCHG2
+    __tact_store_bool INLINECALLDICT
+    0 PUSHINT
+    SWAP
+    3 STI
+    s0 s5 XCHG2
+    __tact_store_address INLINECALLDICT
+    s0 s3 XCHG2
+    STGRAMS
+    0 PUSHINT
+    SWAP
+    105 STI
+    s3 PUSH
+    ISNULL
+    NOT
+    s5 PUSH
+    ISNULL
+    NOT
+    OR
+    IF:<{
+      TRUE
+      __tact_store_bool INLINECALLDICT
+      NEWC
+      FALSE
+      __tact_store_bool INLINECALLDICT
+      FALSE
+      __tact_store_bool INLINECALLDICT
+      s4 PUSH
+      ISNULL
+      NOT
+      IF:<{
+        TRUE
+        __tact_store_bool INLINECALLDICT
+        s0 s4 XCHG
+        __tact_not_null INLINECALLDICT
+        s0 s4 XCHG2
+        STREF
+      }>ELSE<{
+        s4 POP
+        s0 s3 XCHG
+        FALSE
+        __tact_store_bool INLINECALLDICT
+      }>
+      s4 PUSH
+      ISNULL
+      NOT
+      IF:<{
+        TRUE
+        __tact_store_bool INLINECALLDICT
+        s0 s4 XCHG
+        __tact_not_null INLINECALLDICT
+        s0 s4 XCHG2
+        STREF
+      }>ELSE<{
+        s4 POP
+        s0 s3 XCHG
+        FALSE
+        __tact_store_bool INLINECALLDICT
+      }>
+      FALSE
+      __tact_store_bool INLINECALLDICT
+      s0 s2 XCHG
+      TRUE
+      __tact_store_bool INLINECALLDICT
+      s0 s2 XCHG
+      ENDC
+      ROT
+      STREF
+    }>ELSE<{
+      s3 POP
+      s3 POP
+      SWAP
+      FALSE
+      __tact_store_bool INLINECALLDICT
+    }>
+    OVER
+    ISNULL
+    NOT
+    IF:<{
+      TRUE
+      __tact_store_bool INLINECALLDICT
+      SWAP
+      __tact_not_null INLINECALLDICT
+      SWAP
+      STREF
+    }>ELSE<{
+      NIP
+      FALSE
+      __tact_store_bool INLINECALLDICT
+    }>
+    ENDC
+    SWAP
+    SENDRAWMSG
+  }>
+  __gen_constructor_SendParameters$bounce_to_value_mode_body PROCINLINE:<{
+    PUSHNULL
+    PUSHNULL
+  }>
+  $reply PROCINLINE:<{
+    TRUE
+    __tact_context_get_sender INLINECALLDICT
+    0 PUSHINT
+    ROT
+    s0 s3 XCHG
+    66 PUSHINT
+    SWAP
+    __gen_constructor_SendParameters$bounce_to_value_mode_body INLINECALLDICT
+    $send INLINECALLDICT
+  }>
+  $__gen_String_asComment PROCINLINE:<{
+    __tact_string_builder_start_comment INLINECALLDICT
+    SWAP
+    __tact_string_builder_append INLINECALLDICT
+    __tact_string_builder_end INLINECALLDICT
+  }>
+  __gen_constructor_Excesses$queryId PROCINLINE:<{
+  }>
+  __gen_constructor_DeployOk$queryId PROCINLINE:<{
+  }>
+  $__gen_CreditProfile_insertContent PROCINLINE:<{
+    IF:<{
+      s4 PUSH
+      NEWC
+      256 STU
+      ENDC
+    }>ELSE<{
+      $emptyCell INLINECALLDICT
+    }>
+  }>
+  __gen_constructor_NftData$isInitialized_index_collectionAddress_ownerAddress_individualContent PROCINLINE:<{
+  }>
+  $__gen_CreditProfile_get_nft_data PROCINLINE:<{
+    2DROP
+    s2 PUSH
+    NEWC
+    256 STU
+    ENDC
+    __gen_constructor_NftData$isInitialized_index_collectionAddress_ownerAddress_individualContent INLINECALLDICT
+  }>
+  $__gen_get_get_nft_data PROC:<{
+    __gen_load_CreditProfile INLINECALLDICT
+    $__gen_CreditProfile_get_nft_data INLINECALLDICT
+    __gen_NftData_to_external INLINECALLDICT
+  }>
+  $__gen_CreditProfile_get_authority_address PROCINLINE:<{
+    s1 s5 XCHG
+    5 BLKDROP
+  }>
+  $__gen_get_get_authority_address PROC:<{
+    __gen_load_CreditProfile INLINECALLDICT
+    $__gen_CreditProfile_get_authority_address INLINECALLDICT
+  }>
+  $__gen_CreditProfile_get_revoked_time PROCINLINE:<{
+    5 1 BLKDROP2
+  }>
+  $__gen_get_get_revoked_time PROC:<{
+    __gen_load_CreditProfile INLINECALLDICT
+    $__gen_CreditProfile_get_revoked_time INLINECALLDICT
+  }>
+  __gen_constructor_SendParameters$to_value_mode_body PROCINLINE:<{
+    TRUE
+    4 -ROLL
+    PUSHNULL
+    PUSHNULL
+  }>
+  $__gen_CreditProfile_receive_Init PROCINLINE:<{
+    s3 POP
+    s4 POP
+    s4 POP
+    2977 PUSHINT
+    s0 s7 XCHG
+    NOT
+    s1 s7 XCHG
+    THROWANYIFNOT
+    40129 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    s5 PUSH
+    __tact_address_eq INLINECALLDICT
+    THROWANYIFNOT
+    TRUE
+    s2 PUSH
+    __tact_my_balance INLINECALLDICT
+    s0 s5 XCHG2
+    ADD
+    __tact_context_get INLINECALLDICT
+    __gen_Context_get_value INLINECALLDICT
+    SUB
+    0 PUSHINT
+    RAWRESERVE
+    0 PUSHINT
+    64 PUSHINT
+    B{b5ee9c7241010101001800002c4372656469742050726f66696c652063726561746564095a8305} B>boc <s PUSHSLICE
+    $__gen_String_asComment INLINECALLDICT
+    s3 s5 XCHG
+    __gen_constructor_SendParameters$to_value_mode_body INLINECALLDICT
+    $send INLINECALLDICT
+    s1 s5 XCHG
+  }>
+  __gen_constructor_ReportStaticData$queryId_index_collection PROCINLINE:<{
+  }>
+  $__gen_CreditProfile_receive_GetStaticData PROCINLINE:<{
+    s5 s4 PUSH2
+    __gen_constructor_ReportStaticData$queryId_index_collection INLINECALLDICT
+    __gen_writecell_ReportStaticData INLINECALLDICT
+    $reply INLINECALLDICT
+  }>
+  __gen_constructor_OwnershipProof$queryId_itemId_owner_data_revokedAt_content PROCINLINE:<{
+  }>
+  $__gen_CreditProfile_receive_ProveOwnership PROCINLINE:<{
+    58772 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    s8 PUSH
+    __tact_address_eq INLINECALLDICT
+    THROWANYIFNOT
+    0 PUSHINT
+    64 PUSHINT
+    s10 s8 s6 PUSH3
+    s6 s14 XCHG
+    s5 s13 XCHG
+    s4 s12 XCHG
+    s3 s11 XCHG
+    s10 s9 s13 XCHG3
+    $__gen_CreditProfile_insertContent INLINECALLDICT
+    s5 s8 XCHG
+    s4 s10 XCHG
+    s3 s9 XCHG
+    s14 s13 s0 XCHG3
+    __gen_constructor_OwnershipProof$queryId_itemId_owner_data_revokedAt_content INLINECALLDICT
+    __gen_writecell_OwnershipProof INLINECALLDICT
+    s2 s3 XCHG
+    s7 s6 s0 XCHG3
+    __gen_constructor_SendParameters$to_value_mode_body INLINECALLDICT
+    $send INLINECALLDICT
+    s0 s5 s5 XCHG3
+    s0 s3 XCHG
+    s0 s4 XCHG
+  }>
+  $__gen_CreditProfile_receive_Destroy PROCINLINE:<{
+    s2 POP
+    58772 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    s0 s4 XCHG2
+    __tact_address_eq INLINECALLDICT
+    s1 s3 XCHG
+    THROWANYIFNOT
+    PUSHNULL
+    PUSHNULL
+    s0 s2 XCHG
+    __gen_constructor_Excesses$queryId INLINECALLDICT
+    __gen_writecell_Excesses INLINECALLDICT
+    $reply INLINECALLDICT
+    s0 s2 XCHG
+  }>
+  $__gen_CreditProfile_receive_ChangeAuthority PROCINLINE:<{
+    23129 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    s0 s5 XCHG2
+    __tact_address_eq INLINECALLDICT
+    s1 s4 XCHG
+    THROWANYIFNOT
+    __gen_constructor_Excesses$queryId INLINECALLDICT
+    __gen_writecell_Excesses INLINECALLDICT
+    $reply INLINECALLDICT
+  }>
+  $__gen_CreditProfile_receive_Revoke PROCINLINE:<{
+    23129 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    s4 PUSH
+    __tact_address_eq INLINECALLDICT
+    THROWANYIFNOT
+    10990 PUSHINT
+    s0 s2 XCHG
+    0 EQINT
+    s1 s2 XCHG
+    THROWANYIFNOT
+    NOW
+    SWAP
+    __gen_constructor_Excesses$queryId INLINECALLDICT
+    __gen_writecell_Excesses INLINECALLDICT
+    $reply INLINECALLDICT
+  }>
+  __gen_constructor_OwnerInfo$queryId_itemId_initiator_owner_data_revokedAt_content PROCINLINE:<{
+  }>
+  $__gen_CreditProfile_receive_RequestOwner PROCINLINE:<{
+    0 PUSHINT
+    64 PUSHINT
+    s10 PUSH
+    __tact_context_get_sender INLINECALLDICT
+    s10 s8 PUSH2
+    s6 s15 XCHG
+    s5 s14 XCHG
+    s4 s13 XCHG
+    s3 s12 XCHG
+    s11 s10 s15 XCHG3
+    $__gen_CreditProfile_insertContent INLINECALLDICT
+    s6 s9 XCHG
+    s5 s12 XCHG
+    s4 s11 XCHG
+    s3 s10 XCHG
+    s7 s15 s0 XCHG3
+    __gen_constructor_OwnerInfo$queryId_itemId_initiator_owner_data_revokedAt_content INLINECALLDICT
+    __gen_writecell_OwnerInfo INLINECALLDICT
+    s2 s3 XCHG
+    s8 s7 s0 XCHG3
+    __gen_constructor_SendParameters$to_value_mode_body INLINECALLDICT
+    $send INLINECALLDICT
+    s4 s5 XCHG
+    s0 s3 s4 XCHG3
+  }>
+  $__gen_CreditProfile_receive_Deploy PROCINLINE:<{
+    __gen_constructor_DeployOk$queryId INLINECALLDICT
+    __gen_writecell_DeployOk INLINECALLDICT
+    $reply INLINECALLDICT
+  }>
+  __gen_router_CreditProfile PROCREF:<{
+    0 PUSHINT
+    OVER
+    SBITS
+    31 GTINT
+    IF:<{
+      DROP
+      DUP
+      32 PLDU
+    }>
+    s0 s2 XCHG
+    IFJMP:<{
+      2DROP
+      TRUE
+    }>
+    OVER
+    2169787220 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      __gen_read_Init INLINECALLDICT
+      1 4 BLKDROP2
+      $__gen_CreditProfile_receive_Init INLINECALLDICT
+      TRUE
+    }>
+    OVER
+    801842850 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      __gen_read_GetStaticData INLINECALLDICT
+      NIP
+      $__gen_CreditProfile_receive_GetStaticData INLINECALLDICT
+      TRUE
+    }>
+    OVER
+    81711432 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      __gen_read_ProveOwnership INLINECALLDICT
+      1 4 BLKDROP2
+      $__gen_CreditProfile_receive_ProveOwnership INLINECALLDICT
+      TRUE
+    }>
+    OVER
+    520377210 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      __gen_read_Destroy INLINECALLDICT
+      NIP
+      $__gen_CreditProfile_receive_Destroy INLINECALLDICT
+      TRUE
+    }>
+    OVER
+    2458907371 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      __gen_read_ChangeAuthority INLINECALLDICT
+      1 2 BLKDROP2
+      $__gen_CreditProfile_receive_ChangeAuthority INLINECALLDICT
+      TRUE
+    }>
+    OVER
+    1871312355 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      __gen_read_Revoke INLINECALLDICT
+      NIP
+      $__gen_CreditProfile_receive_Revoke INLINECALLDICT
+      TRUE
+    }>
+    OVER
+    3502489578 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      __gen_read_RequestOwner INLINECALLDICT
+      1 4 BLKDROP2
+      $__gen_CreditProfile_receive_RequestOwner INLINECALLDICT
+      TRUE
+    }>
+    SWAP
+    2490013878 PUSHINT
+    EQUAL
+    IFJMP:<{
+      __gen_read_Deploy INLINECALLDICT
+      NIP
+      $__gen_CreditProfile_receive_Deploy INLINECALLDICT
+      TRUE
+    }>
+    DROP
+    FALSE
+  }>
+  recv_internal PROC:<{
+    SWAP
+    CTOS
+    4 LDU
+    SWAP
+    1 PUSHINT
+    AND
+    1 EQINT
+    IF:<{
+      TRUE
+    }>ELSE<{
+      FALSE
+    }>
+    SWAP
+    LDMSGADDR
+    SWAP
+    __tact_verify_address INLINECALLDICT
+    s0 s4 s2 PUXCPU
+    s0 s3 XCHG
+    4 TUPLE
+    __tact_context SETGLOB
+    s0 s2 XCHG
+    __tact_context_sender SETGLOB
+    __gen_load_CreditProfile INLINECALLDICT
+    2 6 BLKSWAP
+    __gen_router_CreditProfile INLINECALLDICT
+    DROP
+    __gen_store_CreditProfile INLINECALLDICT
+  }>
+  supported_interfaces PROC:<{
+    123515602279859691144772641439386770278 PUSHINT
+    209801025412363888721030803524359905849 PUSHINT
+    42980537499636128163026532310500881091 PUSHINT
+    36993126140238121407019133875791708966 PUSHINT
+    209474421377847335869795010607481022628 PUSHINT
+  }>
+  get_abi_ipfs PROC:<{
+    x{697066733a2f2f516d6656524e4d554a696b797478776f69386b65685158543158694b53677a6d48767447763443527442716e4879} PUSHSLICE
+  }>
+  lazy_deployment_completed PROC:<{
+    c4 PUSH
+    CTOS
+    1 LDI
+    SWAP
+  }>
+}END>c

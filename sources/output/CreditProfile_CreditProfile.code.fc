@@ -1,0 +1,634 @@
+#pragma version =0.4.2;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+slice __tact_verify_address(slice address) inline {
+    throw_unless(136, address.slice_bits() == 267);
+    var h = address.preload_uint(11);
+    throw_unless(136, (h == 1024) | (h == 1279));
+    throw_unless(137, h == 1024);
+    return address;
+}
+
+(slice, slice) __tact_load_address(slice cs) inline {
+    slice raw = cs~load_msg_addr();
+    return (cs, __tact_verify_address(raw));
+}
+
+(slice, slice) __tact_load_address_opt(slice cs) inline {
+    slice raw = cs~load_msg_addr();
+    if (raw.preload_uint(2) != 0) {
+        return (cs, __tact_verify_address(raw));
+    } else {
+        return (cs, null());
+    }
+}
+
+builder __tact_store_address(builder b, slice address) inline {
+    return b.store_slice(__tact_verify_address(address));
+}
+
+builder __tact_store_address_opt(builder b, slice address) inline {
+    if (null?(address)) {
+        b = b.store_uint(0, 2);
+        return b;
+    } else {
+        return __tact_store_address(b, address);
+    }
+}
+
+int __tact_my_balance() inline {
+    return pair_first(get_balance());
+}
+
+forall X -> X __tact_not_null(X x) inline { throw_if(128, null?(x)); return x; }
+
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_context_sys;
+
+(int, slice, int, slice) __tact_context_get() inline { return __tact_context; }
+
+slice __tact_context_get_sender() inline { return __tact_context_sender; }
+
+builder __tact_store_bool(builder b, int v) inline {
+    b = b.store_int(v, 1);
+    return b;
+}
+
+int __tact_address_eq(slice a, slice b) inline {
+    return equal_slice_bits(a, b);
+}
+
+tuple __tact_string_builder_start(builder b) inline {
+    return tpush(tpush(empty_tuple(), b), null());
+}
+
+tuple __tact_string_builder_start_comment() inline {
+    return __tact_string_builder_start(begin_cell().store_uint(0, 32));
+}
+
+cell __tact_string_builder_end(tuple builders) inline {
+    (builder b, tuple tail) = uncons(builders);
+    cell c = b.end_cell();
+    while(~ null?(tail)) {
+        (b, tail) = uncons(tail);
+        c = b.store_ref(c).end_cell();
+    }
+    return c;
+}
+
+((tuple), ()) __tact_string_builder_append(tuple builders, slice sc) inline_ref {
+    int sliceRefs = slice_refs(sc);
+    int sliceBits = slice_bits(sc);
+
+    while((sliceBits > 0) | (sliceRefs > 0)) {
+
+        ;; Load the current builder
+        (builder b, tuple tail) = uncons(builders);
+        int remBytes = 127 - (builder_bits(b) / 8);
+        int exBytes = sliceBits / 8;
+
+        ;; Append bits
+        int amount = min(remBytes, exBytes);
+        if (amount > 0) {
+            slice read = sc~load_bits(amount * 8);
+            b = b.store_slice(read);
+        }
+
+        ;; Update builders
+        builders = cons(b, tail);
+
+        ;; Check if we need to add a new cell and continue
+        if (exBytes - amount > 0) {
+            var bb = begin_cell();
+            builders = cons(bb, builders);
+            sliceBits = (exBytes - amount) * 8;
+        } elseif (sliceRefs > 0) {
+            sc = sc~load_ref().begin_parse();
+            sliceRefs = slice_refs(sc);
+            sliceBits = slice_bits(sc);
+        } else {
+            sliceBits = 0;
+            sliceRefs = 0;
+        }
+    }
+
+    return ((builders), ());
+}
+
+(slice, ((int))) __gen_read_Deploy(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2490013878);
+    var v'queryId = sc_0~load_uint(64);
+    return (sc_0, (v'queryId));
+}
+
+builder __gen_write_DeployOk(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 2952335191, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell __gen_writecell_DeployOk((int) v) inline {
+    return __gen_write_DeployOk(begin_cell(), v).end_cell();
+}
+
+(slice, ((int, int, slice, slice))) __gen_read_Init(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2169787220);
+    var v'queryId = sc_0~load_uint(64);
+    var v'forwardValue = sc_0~load_coins();
+    var v'owner = sc_0~__tact_load_address();
+    var v'authority = sc_0~__tact_load_address();
+    return (sc_0, (v'queryId, v'forwardValue, v'owner, v'authority));
+}
+
+(slice, ((int))) __gen_read_GetStaticData(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 801842850);
+    var v'queryId = sc_0~load_uint(64);
+    return (sc_0, (v'queryId));
+}
+
+(slice, ((int, slice, cell, int))) __gen_read_ProveOwnership(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 81711432);
+    var v'queryId = sc_0~load_uint(64);
+    var v'dest = sc_0~__tact_load_address();
+    var v'forwardPayload = sc_0~load_ref();
+    var v'withContent = sc_0~load_int(1);
+    return (sc_0, (v'queryId, v'dest, v'forwardPayload, v'withContent));
+}
+
+(slice, ((int, slice, cell, int))) __gen_read_RequestOwner(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3502489578);
+    var v'queryId = sc_0~load_uint(64);
+    var v'dest = sc_0~__tact_load_address();
+    var v'forwardPayload = sc_0~load_ref();
+    var v'withContent = sc_0~load_int(1);
+    return (sc_0, (v'queryId, v'dest, v'forwardPayload, v'withContent));
+}
+
+(slice, ((int))) __gen_read_Destroy(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 520377210);
+    var v'queryId = sc_0~load_uint(64);
+    return (sc_0, (v'queryId));
+}
+
+(slice, ((int, slice))) __gen_read_ChangeAuthority(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2458907371);
+    var v'queryId = sc_0~load_uint(64);
+    var v'newAuthority = sc_0~__tact_load_address();
+    return (sc_0, (v'queryId, v'newAuthority));
+}
+
+(slice, ((int))) __gen_read_Revoke(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1871312355);
+    var v'queryId = sc_0~load_uint(64);
+    return (sc_0, (v'queryId));
+}
+
+builder __gen_write_ReportStaticData(builder build_0, (int, int, slice) v) inline {
+    var (v'queryId, v'index, v'collection) = v;
+    build_0 = store_uint(build_0, 2339837749, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    build_0 = build_0.store_uint(v'index, 256);
+    build_0 = __tact_store_address(build_0, v'collection);
+    return build_0;
+}
+
+cell __gen_writecell_ReportStaticData((int, int, slice) v) inline {
+    return __gen_write_ReportStaticData(begin_cell(), v).end_cell();
+}
+
+builder __gen_write_OwnershipProof(builder build_0, (int, int, slice, cell, int, cell) v) inline_ref {
+    var (v'queryId, v'itemId, v'owner, v'data, v'revokedAt, v'content) = v;
+    build_0 = store_uint(build_0, 86296494, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    build_0 = build_0.store_uint(v'itemId, 256);
+    build_0 = __tact_store_address_opt(build_0, v'owner);
+    build_0 = build_0.store_ref(v'data);
+    build_0 = build_0.store_uint(v'revokedAt, 64);
+    build_0 = ~ null?(v'content) ? build_0.store_int(true, 1).store_ref(v'content) : build_0.store_int(false, 1);
+    return build_0;
+}
+
+cell __gen_writecell_OwnershipProof((int, int, slice, cell, int, cell) v) inline {
+    return __gen_write_OwnershipProof(begin_cell(), v).end_cell();
+}
+
+builder __gen_write_OwnerInfo(builder build_0, (int, int, slice, slice, cell, int, cell) v) inline_ref {
+    var (v'queryId, v'itemId, v'initiator, v'owner, v'data, v'revokedAt, v'content) = v;
+    build_0 = store_uint(build_0, 232130531, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    build_0 = build_0.store_uint(v'itemId, 256);
+    build_0 = __tact_store_address(build_0, v'initiator);
+    build_0 = __tact_store_address_opt(build_0, v'owner);
+    build_0 = build_0.store_ref(v'data);
+    build_0 = build_0.store_uint(v'revokedAt, 64);
+    build_0 = ~ null?(v'content) ? build_0.store_int(true, 1).store_ref(v'content) : build_0.store_int(false, 1);
+    return build_0;
+}
+
+cell __gen_writecell_OwnerInfo((int, int, slice, slice, cell, int, cell) v) inline {
+    return __gen_write_OwnerInfo(begin_cell(), v).end_cell();
+}
+
+builder __gen_write_Excesses(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 3576854235, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell __gen_writecell_Excesses((int) v) inline {
+    return __gen_write_Excesses(begin_cell(), v).end_cell();
+}
+
+builder __gen_write_CreditProfile(builder build_0, (int, int, slice, slice, slice, int) v) inline {
+    var (v'isInitialized, v'index, v'collection, v'owner, v'authority, v'revokedAt) = v;
+    build_0 = build_0.store_int(v'isInitialized, 1);
+    build_0 = build_0.store_uint(v'index, 256);
+    build_0 = __tact_store_address(build_0, v'collection);
+    build_0 = __tact_store_address_opt(build_0, v'owner);
+    var build_1 = begin_cell();
+    build_1 = __tact_store_address_opt(build_1, v'authority);
+    build_1 = build_1.store_uint(v'revokedAt, 64);
+    build_0 = store_ref(build_0, build_1.end_cell());
+    return build_0;
+}
+
+(slice, ((int, int, slice, slice, slice, int))) __gen_read_CreditProfile(slice sc_0) inline {
+    var v'isInitialized = sc_0~load_int(1);
+    var v'index = sc_0~load_uint(256);
+    var v'collection = sc_0~__tact_load_address();
+    var v'owner = sc_0~__tact_load_address_opt();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'authority = sc_1~__tact_load_address_opt();
+    var v'revokedAt = sc_1~load_uint(64);
+    return (sc_0, (v'isInitialized, v'index, v'collection, v'owner, v'authority, v'revokedAt));
+}
+
+_ __gen_Context_get_value((int, slice, int, slice) v) inline {
+    var (v'bounced, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+(int, int, slice, slice, cell) __gen_NftData_to_external(((int, int, slice, slice, cell)) v) inline {
+    var (v'isInitialized, v'index, v'collectionAddress, v'ownerAddress, v'individualContent) = v; 
+    return (v'isInitialized, v'index, v'collectionAddress, v'ownerAddress, v'individualContent);
+}
+
+(slice, ((int, slice))) __gen_read_$init$CreditProfile(slice sc_0) inline {
+    var v'index = sc_0~load_int(257);
+    var v'collection = sc_0~__tact_load_address();
+    return (sc_0, (v'index, v'collection));
+}
+
+(int, int, slice, slice, slice, int) $__gen_CreditProfile_init(int $index, slice $collection) impure inline_ref {
+    var (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt)) = (null(), null(), null(), null(), null(), null());
+    $self'isInitialized = false;
+    $self'index = $index;
+    $self'collection = $collection;
+    $self'revokedAt = 0;
+    return ($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt);
+}
+
+(int, int, slice, slice, slice, int) __gen_load_CreditProfile() impure inline {
+    slice $sc = get_data().begin_parse();
+    __tact_context_sys = $sc~load_ref();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~__gen_read_CreditProfile();
+    } else {
+        ;; Allow only workchain deployments
+        throw_unless(137, my_address().preload_uint(11) == 1024);
+        (int index, slice collection) = $sc~__gen_read_$init$CreditProfile();
+        $sc.end_parse();
+        return $__gen_CreditProfile_init(index, collection);
+    }
+}
+
+() __gen_store_CreditProfile((int, int, slice, slice, slice, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_ref(__tact_context_sys);
+    b = b.store_int(true, 1);
+    b = __gen_write_CreditProfile(b, v);
+    set_data(b.end_cell());
+}
+
+;; String "Credit Profile created"
+slice __gen_str_977490598() asm "B{b5ee9c7241010101001800002c4372656469742050726f66696c652063726561746564095a8305} B>boc <s PUSHSLICE";
+
+cell $emptyCell() impure inline {
+    return end_cell(begin_cell());
+}
+
+() $send((int, slice, int, int, cell, cell, cell) $params) impure inline {
+    var (($params'bounce, $params'to, $params'value, $params'mode, $params'body, $params'code, $params'data)) = $params;
+    builder $b = begin_cell();
+    $b = store_int($b, 1, 2);
+    $b = __tact_store_bool($b, $params'bounce);
+    $b = store_int($b, 0, 3);
+    $b = __tact_store_address($b, $params'to);
+    $b = store_coins($b, $params'value);
+    $b = store_int($b, 0, ((((1 + 4) + 4) + 64) + 32));
+    if (((~ null?($params'code)) | (~ null?($params'data)))) {
+        $b = __tact_store_bool($b, true);
+        builder $bc = begin_cell();
+        $bc = __tact_store_bool($bc, false);
+        $bc = __tact_store_bool($bc, false);
+        if ((~ null?($params'code))) {
+            $bc = __tact_store_bool($bc, true);
+            $bc = store_ref($bc, __tact_not_null($params'code));
+        } else {
+            $bc = __tact_store_bool($bc, false);
+        }
+        if ((~ null?($params'data))) {
+            $bc = __tact_store_bool($bc, true);
+            $bc = store_ref($bc, __tact_not_null($params'data));
+        } else {
+            $bc = __tact_store_bool($bc, false);
+        }
+        $bc = __tact_store_bool($bc, false);
+        $b = __tact_store_bool($b, true);
+        $b = store_ref($b, end_cell($bc));
+    } else {
+        $b = __tact_store_bool($b, false);
+    }
+    cell $body = $params'body;
+    if ((~ null?($body))) {
+        $b = __tact_store_bool($b, true);
+        $b = store_ref($b, __tact_not_null($body));
+    } else {
+        $b = __tact_store_bool($b, false);
+    }
+    cell $c = end_cell($b);
+    send_raw_message($c, $params'mode);
+}
+
+((int, slice, int, int, cell, cell, cell)) __gen_constructor_SendParameters$bounce_to_value_mode_body(int bounce, slice to, int value, int mode, cell body) inline {
+    return (bounce, to, value, mode, body, null(), null());
+}
+
+() $reply(cell $body) impure inline {
+    $send(__gen_constructor_SendParameters$bounce_to_value_mode_body(true, __tact_context_get_sender(), 0, (64 + 2), $body));
+}
+
+cell $__gen_String_asComment(slice $self) impure inline {
+    var ($self) = $self;
+    tuple $b = __tact_string_builder_start_comment();
+    $b~__tact_string_builder_append($self);
+    return __tact_string_builder_end($b);
+}
+
+((int)) __gen_constructor_Excesses$queryId(int queryId) inline {
+    return (queryId);
+}
+
+((int)) __gen_constructor_DeployOk$queryId(int queryId) inline {
+    return (queryId);
+}
+
+((int, int, slice, slice, slice, int), cell) $__gen_CreditProfile_insertContent((int, int, slice, slice, slice, int) $self, int $withContent) impure inline {
+    var (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt)) = $self;
+    if ($withContent) {
+        return (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt), end_cell(store_uint(begin_cell(), $self'index, 256)));
+    }
+    return (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt), $emptyCell());
+}
+
+((int, int, slice, slice, cell)) __gen_constructor_NftData$isInitialized_index_collectionAddress_ownerAddress_individualContent(int isInitialized, int index, slice collectionAddress, slice ownerAddress, cell individualContent) inline {
+    return (isInitialized, index, collectionAddress, ownerAddress, individualContent);
+}
+
+(int, int, slice, slice, cell) $__gen_CreditProfile_get_nft_data((int, int, slice, slice, slice, int) $self) impure inline {
+    var (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt)) = $self;
+    return __gen_constructor_NftData$isInitialized_index_collectionAddress_ownerAddress_individualContent($self'isInitialized, $self'index, $self'collection, $self'owner, end_cell(store_uint(begin_cell(), $self'index, 256)));
+}
+
+_ $__gen_get_get_nft_data() method_id(102351) {
+    var self = __gen_load_CreditProfile();
+    var res = $__gen_CreditProfile_get_nft_data(self);
+    return __gen_NftData_to_external(res);
+}
+
+slice $__gen_CreditProfile_get_authority_address((int, int, slice, slice, slice, int) $self) impure inline {
+    var (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt)) = $self;
+    return $self'authority;
+}
+
+_ $__gen_get_get_authority_address() method_id(84760) {
+    var self = __gen_load_CreditProfile();
+    var res = $__gen_CreditProfile_get_authority_address(self);
+    return res;
+}
+
+int $__gen_CreditProfile_get_revoked_time((int, int, slice, slice, slice, int) $self) impure inline {
+    var (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt)) = $self;
+    return $self'revokedAt;
+}
+
+_ $__gen_get_get_revoked_time() method_id(97667) {
+    var self = __gen_load_CreditProfile();
+    var res = $__gen_CreditProfile_get_revoked_time(self);
+    return res;
+}
+
+((int, slice, int, int, cell, cell, cell)) __gen_constructor_SendParameters$to_value_mode_body(slice to, int value, int mode, cell body) inline {
+    return (true, to, value, mode, body, null(), null());
+}
+
+(((int, int, slice, slice, slice, int)), ()) $__gen_CreditProfile_receive_Init((int, int, slice, slice, slice, int) $self, (int, int, slice, slice) $msg) impure inline {
+    var ($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt) = $self;
+    var ($msg'queryId, $msg'forwardValue, $msg'owner, $msg'authority) = $msg;
+    throw_unless(2977, (~ $self'isInitialized));
+    throw_unless(40129, __tact_address_eq(__tact_context_get_sender(), $self'collection));
+    $self'isInitialized = true;
+    $self'owner = $msg'owner;
+    $self'authority = $msg'authority;
+    raw_reserve(((__tact_my_balance() + $msg'forwardValue) - __gen_Context_get_value(__tact_context_get())), 0);
+    $send(__gen_constructor_SendParameters$to_value_mode_body($msg'owner, 0, 64, $__gen_String_asComment(__gen_str_977490598())));
+    return (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt), ());
+}
+
+((int, int, slice)) __gen_constructor_ReportStaticData$queryId_index_collection(int queryId, int index, slice collection) inline {
+    return (queryId, index, collection);
+}
+
+(((int, int, slice, slice, slice, int)), ()) $__gen_CreditProfile_receive_GetStaticData((int, int, slice, slice, slice, int) $self, (int) $msg) impure inline {
+    var ($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt) = $self;
+    var ($msg'queryId) = $msg;
+    $reply(__gen_writecell_ReportStaticData(__gen_constructor_ReportStaticData$queryId_index_collection($msg'queryId, $self'index, $self'collection)));
+    return (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt), ());
+}
+
+((int, int, slice, cell, int, cell)) __gen_constructor_OwnershipProof$queryId_itemId_owner_data_revokedAt_content(int queryId, int itemId, slice owner, cell data, int revokedAt, cell content) inline {
+    return (queryId, itemId, owner, data, revokedAt, content);
+}
+
+(((int, int, slice, slice, slice, int)), ()) $__gen_CreditProfile_receive_ProveOwnership((int, int, slice, slice, slice, int) $self, (int, slice, cell, int) $msg) impure inline {
+    var ($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt) = $self;
+    var ($msg'queryId, $msg'dest, $msg'forwardPayload, $msg'withContent) = $msg;
+    throw_unless(58772, __tact_address_eq(__tact_context_get_sender(), $self'owner));
+    $send(__gen_constructor_SendParameters$to_value_mode_body($msg'dest, 0, 64, __gen_writecell_OwnershipProof(__gen_constructor_OwnershipProof$queryId_itemId_owner_data_revokedAt_content($msg'queryId, $self'index, $self'owner, $msg'forwardPayload, $self'revokedAt, ($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt)~$__gen_CreditProfile_insertContent($msg'withContent)))));
+    return (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt), ());
+}
+
+(((int, int, slice, slice, slice, int)), ()) $__gen_CreditProfile_receive_Destroy((int, int, slice, slice, slice, int) $self, (int) $msg) impure inline {
+    var ($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt) = $self;
+    var ($msg'queryId) = $msg;
+    throw_unless(58772, __tact_address_eq(__tact_context_get_sender(), $self'owner));
+    $self'owner = null();
+    $self'authority = null();
+    $reply(__gen_writecell_Excesses(__gen_constructor_Excesses$queryId($msg'queryId)));
+    return (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt), ());
+}
+
+(((int, int, slice, slice, slice, int)), ()) $__gen_CreditProfile_receive_ChangeAuthority((int, int, slice, slice, slice, int) $self, (int, slice) $msg) impure inline {
+    var ($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt) = $self;
+    var ($msg'queryId, $msg'newAuthority) = $msg;
+    throw_unless(23129, __tact_address_eq(__tact_context_get_sender(), $self'authority));
+    $self'authority = $msg'newAuthority;
+    $reply(__gen_writecell_Excesses(__gen_constructor_Excesses$queryId($msg'queryId)));
+    return (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt), ());
+}
+
+(((int, int, slice, slice, slice, int)), ()) $__gen_CreditProfile_receive_Revoke((int, int, slice, slice, slice, int) $self, (int) $msg) impure inline {
+    var ($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt) = $self;
+    var ($msg'queryId) = $msg;
+    throw_unless(23129, __tact_address_eq(__tact_context_get_sender(), $self'authority));
+    throw_unless(10990, ($self'revokedAt == 0));
+    $self'revokedAt = now();
+    $reply(__gen_writecell_Excesses(__gen_constructor_Excesses$queryId($msg'queryId)));
+    return (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt), ());
+}
+
+((int, int, slice, slice, cell, int, cell)) __gen_constructor_OwnerInfo$queryId_itemId_initiator_owner_data_revokedAt_content(int queryId, int itemId, slice initiator, slice owner, cell data, int revokedAt, cell content) inline {
+    return (queryId, itemId, initiator, owner, data, revokedAt, content);
+}
+
+(((int, int, slice, slice, slice, int)), ()) $__gen_CreditProfile_receive_RequestOwner((int, int, slice, slice, slice, int) $self, (int, slice, cell, int) $msg) impure inline {
+    var ($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt) = $self;
+    var ($msg'queryId, $msg'dest, $msg'forwardPayload, $msg'withContent) = $msg;
+    $send(__gen_constructor_SendParameters$to_value_mode_body($msg'dest, 0, 64, __gen_writecell_OwnerInfo(__gen_constructor_OwnerInfo$queryId_itemId_initiator_owner_data_revokedAt_content($msg'queryId, $self'index, __tact_context_get_sender(), $self'owner, $msg'forwardPayload, $self'revokedAt, ($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt)~$__gen_CreditProfile_insertContent($msg'withContent)))));
+    return (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt), ());
+}
+
+(((int, int, slice, slice, slice, int)), ()) $__gen_CreditProfile_receive_Deploy((int, int, slice, slice, slice, int) $self, (int) $deploy) impure inline {
+    var ($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt) = $self;
+    var ($deploy'queryId) = $deploy;
+    $reply(__gen_writecell_DeployOk(__gen_constructor_DeployOk$queryId($deploy'queryId)));
+    return (($self'isInitialized, $self'index, $self'collection, $self'owner, $self'authority, $self'revokedAt), ());
+}
+
+((int, int, slice, slice, slice, int), int) __gen_router_CreditProfile((int, int, slice, slice, slice, int) self, int msg_bounced, slice in_msg) impure inline_ref {
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Receive Init message
+    if (op == 2169787220) {
+        var msg = in_msg~__gen_read_Init();
+        self~$__gen_CreditProfile_receive_Init(msg);
+        return (self, true);
+    }
+    
+    ;; Receive GetStaticData message
+    if (op == 801842850) {
+        var msg = in_msg~__gen_read_GetStaticData();
+        self~$__gen_CreditProfile_receive_GetStaticData(msg);
+        return (self, true);
+    }
+    
+    ;; Receive ProveOwnership message
+    if (op == 81711432) {
+        var msg = in_msg~__gen_read_ProveOwnership();
+        self~$__gen_CreditProfile_receive_ProveOwnership(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Destroy message
+    if (op == 520377210) {
+        var msg = in_msg~__gen_read_Destroy();
+        self~$__gen_CreditProfile_receive_Destroy(msg);
+        return (self, true);
+    }
+    
+    ;; Receive ChangeAuthority message
+    if (op == 2458907371) {
+        var msg = in_msg~__gen_read_ChangeAuthority();
+        self~$__gen_CreditProfile_receive_ChangeAuthority(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Revoke message
+    if (op == 1871312355) {
+        var msg = in_msg~__gen_read_Revoke();
+        self~$__gen_CreditProfile_receive_Revoke(msg);
+        return (self, true);
+    }
+    
+    ;; Receive RequestOwner message
+    if (op == 3502489578) {
+        var msg = in_msg~__gen_read_RequestOwner();
+        self~$__gen_CreditProfile_receive_RequestOwner(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Deploy message
+    if (op == 2490013878) {
+        var msg = in_msg~__gen_read_Deploy();
+        self~$__gen_CreditProfile_receive_Deploy(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = ((msg_flags & 1) == 1 ? true : false);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = __gen_load_CreditProfile();
+    
+    ;; Handle operation
+    int handled = self~__gen_router_CreditProfile(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(handled, 130);
+    
+    ;; Persist state
+    __gen_store_CreditProfile(self);
+}
+
+_ supported_interfaces() method_id {
+    return (
+        "org.ton.introspection.v0"H >> 128,
+        "org.ton.abi.ipfs.v0"H >> 128,
+        "org.ton.deploy.lazy.v0"H >> 128,
+        "org.ton.debug.v0"H >> 128,
+        "org.ton.chain.workchain.v0"H >> 128
+    );
+}
+
+_ get_abi_ipfs() {
+    return "ipfs://QmfVRNMUJikytxwoi8kehQXT1XiKSgzmHvtGv4CRtBqnHy";
+}
+
+_ lazy_deployment_completed() {
+    return get_data().begin_parse().load_int(1);
+}

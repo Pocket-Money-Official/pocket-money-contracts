@@ -1,0 +1,15 @@
+{
+    "projects": [
+        {
+            "name": "CreditProfile",
+            "path": "./sources/contracts/credit_profile/index.tact",
+            "output": "./sources/output",
+            "options": {
+                "debug": true,
+                "experimental": {
+                    "inline": true
+                }
+            }
+        }
+    ]
+}

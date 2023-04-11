@@ -13,6 +13,10 @@ PROGRAM{
   DECLPROC __tact_address_eq
   DECLPROC __tact_dict_set_code
   DECLPROC __tact_dict_get_code
+  DECLPROC __tact_string_builder_start
+  DECLPROC __tact_string_builder_start_comment
+  DECLPROC __tact_string_builder_end
+  DECLPROC __tact_string_builder_append
   DECLPROC __gen_read_Deploy
   DECLPROC __gen_write_DeployOk
   DECLPROC __gen_writecell_DeployOk
@@ -39,6 +43,7 @@ PROGRAM{
   DECLPROC $__gen_CreditProfile_init_child
   DECLPROC $calculateCreditProfileAddress
   DECLPROC $__gen_Slice_asCell
+  DECLPROC $__gen_String_asComment
   DECLPROC $__gen_Context_readForwardFee
   DECLPROC $__gen_ProfileMinter_assembleItemUrl
   DECLPROC __gen_constructor_CollectionData$nextItemIndex_collectionContent_ownerAddress
@@ -51,6 +56,10 @@ PROGRAM{
   DECLPROC $__gen_ProfileMinter_requireOwner
   DECLPROC $__gen_ProfileMinter_owner
   83229 DECLMETHOD $__gen_get_owner
+  DECLPROC $__gen_ProfileMinter_requireNotStopped
+  DECLPROC $__gen_ProfileMinter_requireStopped
+  DECLPROC $__gen_ProfileMinter_stopped
+  74107 DECLMETHOD $__gen_get_stopped
   DECLPROC __gen_constructor_Excesses$queryId
   DECLPROC $__gen_ProfileMinter_receive_ChangeCollectionOwner
   DECLPROC $__gen_ProfileMinter_receive_ChangeCollectionContent
@@ -60,6 +69,8 @@ PROGRAM{
   DECLPROC $__gen_ProfileMinter_receive_Mint
   DECLPROC __gen_constructor_DeployOk$queryId
   DECLPROC $__gen_ProfileMinter_receive_Deploy
+  DECLPROC $__gen_ProfileMinter_receive_comment_bcfaf776907c719cc8d379d8f194aaaa27e8ca2871cd591781721f215a454501
+  DECLPROC $__gen_ProfileMinter_receive_comment_6c8f44f45fedb4cdfed4de8db14aa5b13ad55d430f759d0669210b74c48fe3df
   DECLPROC __gen_router_ProfileMinter
   DECLPROC recv_internal
   113617 DECLMETHOD supported_interfaces
@@ -161,6 +172,103 @@ PROGRAM{
     NULLSWAPIFNOT
     135 THROWIFNOT
   }>
+  __tact_string_builder_start PROCINLINE:<{
+    NIL
+    SWAP
+    TPUSH
+    PUSHNULL
+    TPUSH
+  }>
+  __tact_string_builder_start_comment PROCINLINE:<{
+    NEWC
+    0 PUSHINT
+    SWAP
+    32 STU
+    __tact_string_builder_start INLINECALLDICT
+  }>
+  __tact_string_builder_end PROCINLINE:<{
+    UNCONS
+    SWAP
+    ENDC
+    WHILE:<{
+      OVER
+      ISNULL
+      NOT
+    }>DO<{
+      SWAP
+      UNCONS
+      -ROT
+      STREF
+      ENDC
+    }>
+    NIP
+  }>
+  __tact_string_builder_append PROCREF:<{
+    DUP
+    SREFS
+    OVER
+    SBITS
+    WHILE:<{
+      DUP
+      0 GTINT
+      s2 PUSH
+      0 GTINT
+      OR
+    }>DO<{
+      s0 s3 XCHG
+      UNCONS
+      127 PUSHINT
+      s2 PUSH
+      BBITS
+      3 RSHIFT#
+      SUB
+      s0 s5 XCHG
+      3 RSHIFT#
+      s5 s5 XCPU
+      MIN
+      DUP
+      0 GTINT
+      IF:<{
+        DUP
+        3 LSHIFT#
+        s1 s5 XCHG
+        LDSLICEX
+        s3 s3 XCHG2
+        STSLICER
+        s0 s1 s4 XCHG3
+      }>
+      -ROT
+      CONS
+      s4 s1 PUSH2
+      SUB
+      0 GTINT
+      IF:<{
+        NEWC
+        SWAP
+        CONS
+        s4 s4 XCHG2
+        SUB
+        3 LSHIFT#
+      }>ELSE<{
+        NIP
+        s3 POP
+        0 GTINT
+        IF:<{
+          LDREF
+          DROP
+          CTOS
+          DUP
+          SREFS
+          OVER
+          SBITS
+        }>ELSE<{
+          0 PUSHINT
+          DUP
+        }>
+      }>
+    }>
+    3 BLKDROP
+  }>
   __gen_read_Deploy PROCINLINE:<{
     32 LDU
     SWAP
@@ -258,8 +366,10 @@ PROGRAM{
     ENDC
   }>
   __gen_write_ProfileMinter PROCINLINE:<{
-    s4 s3 XCHG2
+    s5 s4 XCHG2
     __tact_store_address INLINECALLDICT
+    s1 s2 XCHG
+    1 STI
     257 PUSHINT
     STIX
     NEWC
@@ -278,6 +388,7 @@ PROGRAM{
   __gen_read_ProfileMinter PROCINLINE:<{
     __tact_load_address INLINECALLDICT
     SWAP
+    1 LDI
     257 PUSHINT
     LDIX
     LDREF
@@ -287,6 +398,7 @@ PROGRAM{
     LDREF
     SWAP
     CTOS
+    s1 s5 XCHG
     s1 s4 XCHG
     s3 s3 s0 XCHG3
   }>
@@ -312,8 +424,10 @@ PROGRAM{
     __tact_store_address INLINECALLDICT
   }>
   $__gen_ProfileMinter_init PROCREF:<{
+    FALSE
+    s0 s2 XCHG
     0 PUSHINT
-    -ROT
+    s0 s2 XCHG
   }>
   __gen_load_ProfileMinter PROCINLINE:<{
     c4 PUSH
@@ -325,7 +439,7 @@ PROGRAM{
     SWAP
     IF:<{
       __gen_read_ProfileMinter INLINECALLDICT
-      1 4 BLKDROP2
+      1 5 BLKDROP2
     }>ELSE<{
       MYADDR
       11 PLDU
@@ -347,7 +461,7 @@ PROGRAM{
     TRUE
     SWAP
     1 STI
-    4 -ROLL
+    5 -ROLL
     __gen_write_ProfileMinter INLINECALLDICT
     ENDC
     c4 POP
@@ -511,6 +625,12 @@ PROGRAM{
     STSLICER
     ENDC
   }>
+  $__gen_String_asComment PROCINLINE:<{
+    __tact_string_builder_start_comment INLINECALLDICT
+    SWAP
+    __tact_string_builder_append INLINECALLDICT
+    __tact_string_builder_end INLINECALLDICT
+  }>
   $__gen_Context_readForwardFee PROCINLINE:<{
     3 1 BLKDROP2
     LDGRAMS
@@ -543,6 +663,7 @@ PROGRAM{
   }>
   $__gen_ProfileMinter_get_collection_data PROCINLINE:<{
     DROP
+    1 2 BLKDROP2
     $__gen_Slice_asCell INLINECALLDICT
     ROT
     __gen_constructor_CollectionData$nextItemIndex_collectionContent_ownerAddress INLINECALLDICT
@@ -553,68 +674,93 @@ PROGRAM{
     __gen_CollectionData_to_external INLINECALLDICT
   }>
   $__gen_ProfileMinter_get_nft_address_by_index PROCINLINE:<{
-    4 1 BLKDROP2
+    5 1 BLKDROP2
     $calculateCreditProfileAddress INLINECALLDICT
   }>
   $__gen_get_get_nft_address_by_index PROC:<{
     __gen_load_ProfileMinter INLINECALLDICT
-    4 ROLL
+    5 ROLL
     $__gen_ProfileMinter_get_nft_address_by_index INLINECALLDICT
   }>
   $__gen_ProfileMinter_get_nft_content PROCINLINE:<{
     DROP
     $__gen_ProfileMinter_assembleItemUrl INLINECALLDICT
-    4 1 BLKDROP2
+    5 1 BLKDROP2
   }>
   $__gen_get_get_nft_content PROC:<{
     __gen_load_ProfileMinter INLINECALLDICT
-    2 4 BLKSWAP
+    2 5 BLKSWAP
     $__gen_ProfileMinter_get_nft_content INLINECALLDICT
   }>
   $__gen_ProfileMinter_requireOwner PROCINLINE:<{
     __tact_context_get_sender INLINECALLDICT
-    s4 PUSH
+    s5 PUSH
     __tact_address_eq INLINECALLDICT
     132 THROWIFNOT
   }>
   $__gen_ProfileMinter_owner PROCINLINE:<{
-    3 BLKDROP
+    4 BLKDROP
   }>
   $__gen_get_owner PROC:<{
     __gen_load_ProfileMinter INLINECALLDICT
     $__gen_ProfileMinter_owner INLINECALLDICT
   }>
+  $__gen_ProfileMinter_requireNotStopped PROCINLINE:<{
+    40368 PUSHINT
+    s4 PUSH
+    NOT
+    THROWANYIFNOT
+  }>
+  $__gen_ProfileMinter_requireStopped PROCINLINE:<{
+    53296 PUSHINT
+    s4 PUSH
+    THROWANYIFNOT
+  }>
+  $__gen_ProfileMinter_stopped PROCINLINE:<{
+    s3 s4 XCHG
+    4 BLKDROP
+  }>
+  $__gen_get_stopped PROC:<{
+    __gen_load_ProfileMinter INLINECALLDICT
+    $__gen_ProfileMinter_stopped INLINECALLDICT
+  }>
   __gen_constructor_Excesses$queryId PROCINLINE:<{
   }>
   $__gen_ProfileMinter_receive_ChangeCollectionOwner PROCINLINE:<{
-    4 2 BLKSWAP
+    s4 s6 XCHG
+    s3 s5 XCHG
+    s6 s5 s6 XCHG3
     $__gen_ProfileMinter_requireOwner INLINECALLDICT
-    s3 POP
+    s4 POP
     s0 s4 XCHG
     __gen_constructor_Excesses$queryId INLINECALLDICT
     __gen_writecell_Excesses INLINECALLDICT
     $reply INLINECALLDICT
-    s0 s3 s3 XCHG3
+    2SWAP
   }>
   $__gen_ProfileMinter_receive_ChangeCollectionContent PROCINLINE:<{
-    4 2 BLKSWAP
+    s4 s6 XCHG
+    s3 s5 XCHG
+    s6 s5 s6 XCHG3
     $__gen_ProfileMinter_requireOwner INLINECALLDICT
     NIP
     s0 s4 XCHG
     __gen_constructor_Excesses$queryId INLINECALLDICT
     __gen_writecell_Excesses INLINECALLDICT
     $reply INLINECALLDICT
-    s0 s0 s3 XCHG3
+    2 3 BLKSWAP
   }>
   $__gen_ProfileMinter_receive_ChangeProfileBaseUrl PROCINLINE:<{
-    4 2 BLKSWAP
+    s4 s6 XCHG
+    s3 s5 XCHG
+    s6 s5 s6 XCHG3
     $__gen_ProfileMinter_requireOwner INLINECALLDICT
     DROP
     s0 s4 XCHG
     __gen_constructor_Excesses$queryId INLINECALLDICT
     __gen_writecell_Excesses INLINECALLDICT
     $reply INLINECALLDICT
-    2SWAP
+    s0 s3 s4 XCHG3
   }>
   __gen_constructor_SendParameters$to_mode_code_data_value_body PROCINLINE:<{
     TRUE
@@ -625,6 +771,10 @@ PROGRAM{
   __gen_constructor_Init$queryId_forwardValue_owner_authority PROCINLINE:<{
   }>
   $__gen_ProfileMinter_receive_Mint PROCINLINE:<{
+    s4 s6 XCHG
+    s3 s5 XCHG
+    s6 s5 s6 XCHG3
+    $__gen_ProfileMinter_requireNotStopped INLINECALLDICT
     __tact_context_get INLINECALLDICT
     s3 s2 s1 XCPU2
     46880 PUSHINT
@@ -636,22 +786,23 @@ PROGRAM{
     THROWANYIFNOT
     __tact_context_sys GETGLOB
     MYADDR
-    s7 s(-1) PUXC
+    s5 s(-1) PUXC
     $__gen_CreditProfile_init_child INLINECALLDICT
     2DUP
     $contractAddress INLINECALLDICT
     64 PUSHINT
-    s6 s5 XCHG2
+    s10 s11 XCHG2
     0 PUSHINT
-    s5 s11 XCPU
+    s5 s10 XCPU
     __gen_constructor_Init$queryId_forwardValue_owner_authority INLINECALLDICT
     __gen_writecell_Init INLINECALLDICT
+    s5 s9 XCHG
+    s4 s10 XCHG
     s1 s3 s0 XCHG3
     __gen_constructor_SendParameters$to_mode_code_data_value_body INLINECALLDICT
     $send INLINECALLDICT
-    s0 s2 XCHG
     INC
-    s0 s2 XCHG
+    s0 s3 s4 XCHG3
   }>
   __gen_constructor_DeployOk$queryId PROCINLINE:<{
   }>
@@ -660,7 +811,29 @@ PROGRAM{
     __gen_writecell_DeployOk INLINECALLDICT
     $reply INLINECALLDICT
   }>
+  $__gen_ProfileMinter_receive_comment_bcfaf776907c719cc8d379d8f194aaaa27e8ca2871cd591781721f215a454501 PROCINLINE:<{
+    $__gen_ProfileMinter_requireOwner INLINECALLDICT
+    $__gen_ProfileMinter_requireNotStopped INLINECALLDICT
+    s3 POP
+    TRUE
+    B{b5ee9c7241010101000900000e53746f70706564f09baa70} B>boc <s PUSHSLICE
+    $__gen_String_asComment INLINECALLDICT
+    $reply INLINECALLDICT
+    s0 s3 XCHG
+  }>
+  $__gen_ProfileMinter_receive_comment_6c8f44f45fedb4cdfed4de8db14aa5b13ad55d430f759d0669210b74c48fe3df PROCINLINE:<{
+    $__gen_ProfileMinter_requireOwner INLINECALLDICT
+    $__gen_ProfileMinter_requireStopped INLINECALLDICT
+    s3 POP
+    FALSE
+    B{b5ee9c7241010101000900000e526573756d65648dd69e48} B>boc <s PUSHSLICE
+    $__gen_String_asComment INLINECALLDICT
+    $reply INLINECALLDICT
+    s0 s3 XCHG
+  }>
   __gen_router_ProfileMinter PROCREF:<{
+    c2 SAVE
+    SAMEALTSAVE
     0 PUSHINT
     OVER
     SBITS
@@ -715,16 +888,39 @@ PROGRAM{
       $__gen_ProfileMinter_receive_Mint INLINECALLDICT
       TRUE
     }>
-    SWAP
+    OVER
     2490013878 PUSHINT
     EQUAL
     IFJMP:<{
+      NIP
       __gen_read_Deploy INLINECALLDICT
       NIP
       $__gen_ProfileMinter_receive_Deploy INLINECALLDICT
       TRUE
     }>
-    DROP
+    SWAP
+    0 EQINT
+    IF:<{
+      HASHSU
+      DUP
+      85478235227686204299312064008631277118150318603456584517510472216578858763521 PUSHINT
+      EQUAL
+      IFJMP:<{
+        DROP
+        $__gen_ProfileMinter_receive_comment_bcfaf776907c719cc8d379d8f194aaaa27e8ca2871cd591781721f215a454501 INLINECALLDICT
+        TRUE
+        RETALT
+      }>
+      49102922684337101841979563583256198294100324132395678439113188049283630228447 PUSHINT
+      EQUAL
+      IFJMP:<{
+        $__gen_ProfileMinter_receive_comment_6c8f44f45fedb4cdfed4de8db14aa5b13ad55d430f759d0669210b74c48fe3df INLINECALLDICT
+        TRUE
+        RETALT
+      }>
+    }>ELSE<{
+      DROP
+    }>
     FALSE
   }>
   recv_internal PROC:<{
@@ -751,7 +947,7 @@ PROGRAM{
     s0 s2 XCHG
     __tact_context_sender SETGLOB
     __gen_load_ProfileMinter INLINECALLDICT
-    2 4 BLKSWAP
+    2 5 BLKSWAP
     __gen_router_ProfileMinter INLINECALLDICT
     DROP
     __gen_store_ProfileMinter INLINECALLDICT
@@ -763,9 +959,11 @@ PROGRAM{
     36993126140238121407019133875791708966 PUSHINT
     209474421377847335869795010607481022628 PUSHINT
     86142586315491086060343270784266291122 PUSHINT
+    192989407141549587419771644724066226057 PUSHINT
+    217874028807501790313347176103815139787 PUSHINT
   }>
   get_abi_ipfs PROC:<{
-    x{697066733a2f2f516d6656446a7a4c4b574b454441484e5756595952575154383151726875617761474d7a6461596e717a59637862} PUSHSLICE
+    x{697066733a2f2f516d624e47377050416f7150416b4d5a343170516248736936737a79584d5933777366443148725a323639693563} PUSHSLICE
   }>
   lazy_deployment_completed PROC:<{
     c4 PUSH

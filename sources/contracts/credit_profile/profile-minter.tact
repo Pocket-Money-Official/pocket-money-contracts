@@ -1,5 +1,6 @@
 import "@stdlib/deploy";
 import "@stdlib/ownable";
+import "@stdlib/stoppable";
 import "./messages/in--profile-minter";
 import "./messages/profile-minter--credit-profile";
 import "./credit-profile";
@@ -15,13 +16,15 @@ fun calculateCreditProfileAddress(index: Int): Address {
   return contractAddress(stateInit);
 }
 
-contract ProfileMinter with Deployable, Ownable {
+contract ProfileMinter with Deployable, Ownable, Stoppable, Resumable {
   owner: Address;
+  stopped: Bool;
   nextItemIndex: Int;
   collectionContent: String;
   profileBaseUrl: String;
 
   init(owner: Address, collectionContent: String, profileBaseUrl: String) {
+    self.stopped = false;
     self.owner = owner;
     self.nextItemIndex = 0;
     self.collectionContent = collectionContent;
@@ -62,6 +65,7 @@ contract ProfileMinter with Deployable, Ownable {
   }
 
   receive(msg: Mint) {
+    self.requireNotStopped();
     let ctx: Context = context();
     require(ctx.value > 3 * ctx.readForwardFee(), "Value should be greater than 2x forwardFee");
     let stateInit: StateInit = initOf CreditProfile(self.nextItemIndex, myAddress());

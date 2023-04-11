@@ -1,6 +1,6 @@
 # TACT Compilation Report
 Contract: ProfileMinter
-BOC Size: 2305 bytes
+BOC Size: 2926 bytes
 
 # Types
 Total Types: 23
@@ -98,7 +98,7 @@ TLB: `excesses#d53276db queryId:uint64 = Excesses`
 Signature: `Excesses{queryId:uint64}`
 
 # Get Methods
-Total Get Methods: 4
+Total Get Methods: 5
 
 ## get_collection_data
 
@@ -110,6 +110,8 @@ Argument: index
 Argument: individualConten
 
 ## owner
+
+## stopped
 
 # Error Codes
 2: Stack undeflow
@@ -140,5 +142,7 @@ Argument: individualConten
 10990: Already revoked
 23129: Authority only
 40129: Only collection contract can initialize
+40368: Contract stopped
 46880: Value should be greater than 2x forwardFee
+53296: Contract not stopped
 58772: only owner

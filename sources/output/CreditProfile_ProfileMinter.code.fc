@@ -71,6 +71,63 @@ cell __tact_dict_get_code(cell dict, int id) inline {
     return data;
 }
 
+tuple __tact_string_builder_start(builder b) inline {
+    return tpush(tpush(empty_tuple(), b), null());
+}
+
+tuple __tact_string_builder_start_comment() inline {
+    return __tact_string_builder_start(begin_cell().store_uint(0, 32));
+}
+
+cell __tact_string_builder_end(tuple builders) inline {
+    (builder b, tuple tail) = uncons(builders);
+    cell c = b.end_cell();
+    while(~ null?(tail)) {
+        (b, tail) = uncons(tail);
+        c = b.store_ref(c).end_cell();
+    }
+    return c;
+}
+
+((tuple), ()) __tact_string_builder_append(tuple builders, slice sc) inline_ref {
+    int sliceRefs = slice_refs(sc);
+    int sliceBits = slice_bits(sc);
+
+    while((sliceBits > 0) | (sliceRefs > 0)) {
+
+        ;; Load the current builder
+        (builder b, tuple tail) = uncons(builders);
+        int remBytes = 127 - (builder_bits(b) / 8);
+        int exBytes = sliceBits / 8;
+
+        ;; Append bits
+        int amount = min(remBytes, exBytes);
+        if (amount > 0) {
+            slice read = sc~load_bits(amount * 8);
+            b = b.store_slice(read);
+        }
+
+        ;; Update builders
+        builders = cons(b, tail);
+
+        ;; Check if we need to add a new cell and continue
+        if (exBytes - amount > 0) {
+            var bb = begin_cell();
+            builders = cons(bb, builders);
+            sliceBits = (exBytes - amount) * 8;
+        } elseif (sliceRefs > 0) {
+            sc = sc~load_ref().begin_parse();
+            sliceRefs = slice_refs(sc);
+            sliceBits = slice_bits(sc);
+        } else {
+            sliceBits = 0;
+            sliceRefs = 0;
+        }
+    }
+
+    return ((builders), ());
+}
+
 (slice, ((int))) __gen_read_Deploy(slice sc_0) inline {
     throw_unless(129, sc_0~load_uint(32) == 2490013878);
     var v'queryId = sc_0~load_uint(64);
@@ -141,21 +198,23 @@ cell __gen_writecell_Excesses((int) v) inline {
     return __gen_write_Excesses(begin_cell(), v).end_cell();
 }
 
-builder __gen_write_ProfileMinter(builder build_0, (slice, int, slice, slice) v) inline {
-    var (v'owner, v'nextItemIndex, v'collectionContent, v'profileBaseUrl) = v;
+builder __gen_write_ProfileMinter(builder build_0, (slice, int, int, slice, slice) v) inline {
+    var (v'owner, v'stopped, v'nextItemIndex, v'collectionContent, v'profileBaseUrl) = v;
     build_0 = __tact_store_address(build_0, v'owner);
+    build_0 = build_0.store_int(v'stopped, 1);
     build_0 = build_0.store_int(v'nextItemIndex, 257);
     build_0 = build_0.store_ref(begin_cell().store_slice(v'collectionContent).end_cell());
     build_0 = build_0.store_ref(begin_cell().store_slice(v'profileBaseUrl).end_cell());
     return build_0;
 }
 
-(slice, ((slice, int, slice, slice))) __gen_read_ProfileMinter(slice sc_0) inline {
+(slice, ((slice, int, int, slice, slice))) __gen_read_ProfileMinter(slice sc_0) inline {
     var v'owner = sc_0~__tact_load_address();
+    var v'stopped = sc_0~load_int(1);
     var v'nextItemIndex = sc_0~load_int(257);
     var v'collectionContent = sc_0~load_ref().begin_parse();
     var v'profileBaseUrl = sc_0~load_ref().begin_parse();
-    return (sc_0, (v'owner, v'nextItemIndex, v'collectionContent, v'profileBaseUrl));
+    return (sc_0, (v'owner, v'stopped, v'nextItemIndex, v'collectionContent, v'profileBaseUrl));
 }
 
 (int, cell, slice) __gen_CollectionData_to_external(((int, cell, slice)) v) inline {
@@ -177,16 +236,17 @@ builder __gen_write_$init$CreditProfile(builder build_0, (int, slice) v) inline 
     return build_0;
 }
 
-(slice, int, slice, slice) $__gen_ProfileMinter_init(slice $owner, slice $collectionContent, slice $profileBaseUrl) impure inline_ref {
-    var (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = (null(), null(), null(), null());
+(slice, int, int, slice, slice) $__gen_ProfileMinter_init(slice $owner, slice $collectionContent, slice $profileBaseUrl) impure inline_ref {
+    var (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = (null(), null(), null(), null(), null());
+    $self'stopped = false;
     $self'owner = $owner;
     $self'nextItemIndex = 0;
     $self'collectionContent = $collectionContent;
     $self'profileBaseUrl = $profileBaseUrl;
-    return ($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl);
+    return ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl);
 }
 
-(slice, int, slice, slice) __gen_load_ProfileMinter() impure inline {
+(slice, int, int, slice, slice) __gen_load_ProfileMinter() impure inline {
     slice $sc = get_data().begin_parse();
     __tact_context_sys = $sc~load_ref();
     int $loaded = $sc~load_int(1);
@@ -201,13 +261,19 @@ builder __gen_write_$init$CreditProfile(builder build_0, (int, slice) v) inline 
     }
 }
 
-() __gen_store_ProfileMinter((slice, int, slice, slice) v) impure inline {
+() __gen_store_ProfileMinter((slice, int, int, slice, slice) v) impure inline {
     builder b = begin_cell();
     b = b.store_ref(__tact_context_sys);
     b = b.store_int(true, 1);
     b = __gen_write_ProfileMinter(b, v);
     set_data(b.end_cell());
 }
+
+;; String "Stopped"
+slice __gen_str_441410314() asm "B{b5ee9c7241010101000900000e53746f70706564f09baa70} B>boc <s PUSHSLICE";
+
+;; String "Resumed"
+slice __gen_str_2843554525() asm "B{b5ee9c7241010101000900000e526573756d65648dd69e48} B>boc <s PUSHSLICE";
 
 slice $contractAddress((cell, cell) $s) impure inline {
     var (($s'code, $s'data)) = $s;
@@ -292,6 +358,13 @@ cell $__gen_Slice_asCell(slice $self) impure inline {
     return end_cell(store_slice(begin_cell(), $self));
 }
 
+cell $__gen_String_asComment(slice $self) impure inline {
+    var ($self) = $self;
+    tuple $b = __tact_string_builder_start_comment();
+    $b~__tact_string_builder_append($self);
+    return __tact_string_builder_end($b);
+}
+
 int $__gen_Context_readForwardFee((int, slice, int, slice) $self) impure inline {
     var (($self'bounced, $self'sender, $self'value, $self'raw)) = $self;
     var (($self'bounced, $self'sender, $self'value, $self'raw)) = $self;
@@ -302,17 +375,17 @@ int $__gen_Context_readForwardFee((int, slice, int, slice) $self) impure inline 
     return (($sc~load_coins() * 3) / 2);
 }
 
-((slice, int, slice, slice), cell) $__gen_ProfileMinter_assembleItemUrl((slice, int, slice, slice) $self, int $index) impure inline {
-    var (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
-    return (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), end_cell(store_ref(store_slice(store_uint(begin_cell(), 1, 8), __tact_str_to_slice($self'profileBaseUrl)), end_cell(store_uint(begin_cell(), $index, 256)))));
+((slice, int, int, slice, slice), cell) $__gen_ProfileMinter_assembleItemUrl((slice, int, int, slice, slice) $self, int $index) impure inline {
+    var (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
+    return (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), end_cell(store_ref(store_slice(store_uint(begin_cell(), 1, 8), __tact_str_to_slice($self'profileBaseUrl)), end_cell(store_uint(begin_cell(), $index, 256)))));
 }
 
 ((int, cell, slice)) __gen_constructor_CollectionData$nextItemIndex_collectionContent_ownerAddress(int nextItemIndex, cell collectionContent, slice ownerAddress) inline {
     return (nextItemIndex, collectionContent, ownerAddress);
 }
 
-(int, cell, slice) $__gen_ProfileMinter_get_collection_data((slice, int, slice, slice) $self) impure inline {
-    var (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
+(int, cell, slice) $__gen_ProfileMinter_get_collection_data((slice, int, int, slice, slice) $self) impure inline {
+    var (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
     return __gen_constructor_CollectionData$nextItemIndex_collectionContent_ownerAddress($self'nextItemIndex, $__gen_Slice_asCell(__tact_str_to_slice($self'collectionContent)), $self'owner);
 }
 
@@ -322,8 +395,8 @@ _ $__gen_get_get_collection_data() method_id(102491) {
     return __gen_CollectionData_to_external(res);
 }
 
-slice $__gen_ProfileMinter_get_nft_address_by_index((slice, int, slice, slice) $self, int $index) impure inline {
-    var (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
+slice $__gen_ProfileMinter_get_nft_address_by_index((slice, int, int, slice, slice) $self, int $index) impure inline {
+    var (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
     return $calculateCreditProfileAddress($index);
 }
 
@@ -334,9 +407,9 @@ _ $__gen_get_get_nft_address_by_index(int $$index) method_id(92067) {
     return res;
 }
 
-cell $__gen_ProfileMinter_get_nft_content((slice, int, slice, slice) $self, int $index, cell $individualConten) impure inline {
-    var (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
-    return ($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)~$__gen_ProfileMinter_assembleItemUrl($index);
+cell $__gen_ProfileMinter_get_nft_content((slice, int, int, slice, slice) $self, int $index, cell $individualConten) impure inline {
+    var (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
+    return ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)~$__gen_ProfileMinter_assembleItemUrl($index);
 }
 
 _ $__gen_get_get_nft_content(int $$index, cell $$individualConten) method_id(68445) {
@@ -347,14 +420,14 @@ _ $__gen_get_get_nft_content(int $$index, cell $$individualConten) method_id(684
     return res;
 }
 
-((slice, int, slice, slice), ()) $__gen_ProfileMinter_requireOwner((slice, int, slice, slice) $self) impure inline {
-    var (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
+((slice, int, int, slice, slice), ()) $__gen_ProfileMinter_requireOwner((slice, int, int, slice, slice) $self) impure inline {
+    var (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
     throw_unless(132, __tact_address_eq(__tact_context_get_sender(), $self'owner));
-    return (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
+    return (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
 }
 
-slice $__gen_ProfileMinter_owner((slice, int, slice, slice) $self) impure inline {
-    var (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
+slice $__gen_ProfileMinter_owner((slice, int, int, slice, slice) $self) impure inline {
+    var (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
     return $self'owner;
 }
 
@@ -364,36 +437,59 @@ _ $__gen_get_owner() method_id(83229) {
     return res;
 }
 
+((slice, int, int, slice, slice), ()) $__gen_ProfileMinter_requireNotStopped((slice, int, int, slice, slice) $self) impure inline {
+    var (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
+    throw_unless(40368, (~ $self'stopped));
+    return (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
+}
+
+((slice, int, int, slice, slice), ()) $__gen_ProfileMinter_requireStopped((slice, int, int, slice, slice) $self) impure inline {
+    var (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
+    throw_unless(53296, $self'stopped);
+    return (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
+}
+
+int $__gen_ProfileMinter_stopped((slice, int, int, slice, slice) $self) impure inline {
+    var (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)) = $self;
+    return $self'stopped;
+}
+
+_ $__gen_get_stopped() method_id(74107) {
+    var self = __gen_load_ProfileMinter();
+    var res = $__gen_ProfileMinter_stopped(self);
+    return res;
+}
+
 ((int)) __gen_constructor_Excesses$queryId(int queryId) inline {
     return (queryId);
 }
 
-(((slice, int, slice, slice)), ()) $__gen_ProfileMinter_receive_ChangeCollectionOwner((slice, int, slice, slice) $self, (int, slice) $msg) impure inline {
-    var ($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl) = $self;
+(((slice, int, int, slice, slice)), ()) $__gen_ProfileMinter_receive_ChangeCollectionOwner((slice, int, int, slice, slice) $self, (int, slice) $msg) impure inline {
+    var ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl) = $self;
     var ($msg'queryId, $msg'newOwner) = $msg;
     var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
-    ($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)~$__gen_ProfileMinter_requireOwner();
+    ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)~$__gen_ProfileMinter_requireOwner();
     $self'owner = $msg'newOwner;
     $reply(__gen_writecell_Excesses(__gen_constructor_Excesses$queryId($msg'queryId)));
-    return (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
+    return (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
 }
 
-(((slice, int, slice, slice)), ()) $__gen_ProfileMinter_receive_ChangeCollectionContent((slice, int, slice, slice) $self, (int, slice) $msg) impure inline {
-    var ($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl) = $self;
+(((slice, int, int, slice, slice)), ()) $__gen_ProfileMinter_receive_ChangeCollectionContent((slice, int, int, slice, slice) $self, (int, slice) $msg) impure inline {
+    var ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl) = $self;
     var ($msg'queryId, $msg'newCollectionContent) = $msg;
-    ($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)~$__gen_ProfileMinter_requireOwner();
+    ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)~$__gen_ProfileMinter_requireOwner();
     $self'collectionContent = $msg'newCollectionContent;
     $reply(__gen_writecell_Excesses(__gen_constructor_Excesses$queryId($msg'queryId)));
-    return (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
+    return (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
 }
 
-(((slice, int, slice, slice)), ()) $__gen_ProfileMinter_receive_ChangeProfileBaseUrl((slice, int, slice, slice) $self, (int, slice) $msg) impure inline {
-    var ($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl) = $self;
+(((slice, int, int, slice, slice)), ()) $__gen_ProfileMinter_receive_ChangeProfileBaseUrl((slice, int, int, slice, slice) $self, (int, slice) $msg) impure inline {
+    var ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl) = $self;
     var ($msg'queryId, $msg'newProfileBaseUrl) = $msg;
-    ($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)~$__gen_ProfileMinter_requireOwner();
+    ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)~$__gen_ProfileMinter_requireOwner();
     $self'profileBaseUrl = $msg'newProfileBaseUrl;
     $reply(__gen_writecell_Excesses(__gen_constructor_Excesses$queryId($msg'queryId)));
-    return (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
+    return (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
 }
 
 ((int, slice, int, int, cell, cell, cell)) __gen_constructor_SendParameters$to_mode_code_data_value_body(slice to, int mode, cell code, cell data, int value, cell body) inline {
@@ -404,30 +500,49 @@ _ $__gen_get_owner() method_id(83229) {
     return (queryId, forwardValue, owner, authority);
 }
 
-(((slice, int, slice, slice)), ()) $__gen_ProfileMinter_receive_Mint((slice, int, slice, slice) $self, (int, int) $msg) impure inline {
-    var ($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl) = $self;
+(((slice, int, int, slice, slice)), ()) $__gen_ProfileMinter_receive_Mint((slice, int, int, slice, slice) $self, (int, int) $msg) impure inline {
+    var ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl) = $self;
     var ($msg'queryId, $msg'forwardValue) = $msg;
+    ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)~$__gen_ProfileMinter_requireNotStopped();
     var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
     throw_unless(46880, ($ctx'value > (3 * $__gen_Context_readForwardFee(($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw)))));
     var ($stateInit'code, $stateInit'data) = $__gen_CreditProfile_init_child(__tact_context_sys, $self'nextItemIndex, my_address());
     slice $address = $contractAddress(($stateInit'code, $stateInit'data));
     $send(__gen_constructor_SendParameters$to_mode_code_data_value_body($address, 64, $stateInit'code, $stateInit'data, 0, __gen_writecell_Init(__gen_constructor_Init$queryId_forwardValue_owner_authority($msg'queryId, $msg'forwardValue, $ctx'sender, $self'owner))));
     $self'nextItemIndex = ($self'nextItemIndex + 1);
-    return (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
+    return (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
 }
 
 ((int)) __gen_constructor_DeployOk$queryId(int queryId) inline {
     return (queryId);
 }
 
-(((slice, int, slice, slice)), ()) $__gen_ProfileMinter_receive_Deploy((slice, int, slice, slice) $self, (int) $deploy) impure inline {
-    var ($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl) = $self;
+(((slice, int, int, slice, slice)), ()) $__gen_ProfileMinter_receive_Deploy((slice, int, int, slice, slice) $self, (int) $deploy) impure inline {
+    var ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl) = $self;
     var ($deploy'queryId) = $deploy;
     $reply(__gen_writecell_DeployOk(__gen_constructor_DeployOk$queryId($deploy'queryId)));
-    return (($self'owner, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
+    return (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
 }
 
-((slice, int, slice, slice), int) __gen_router_ProfileMinter((slice, int, slice, slice) self, int msg_bounced, slice in_msg) impure inline_ref {
+((slice, int, int, slice, slice), ()) $__gen_ProfileMinter_receive_comment_bcfaf776907c719cc8d379d8f194aaaa27e8ca2871cd591781721f215a454501((slice, int, int, slice, slice) $self) impure inline {
+    var ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl) = $self;
+    ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)~$__gen_ProfileMinter_requireOwner();
+    ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)~$__gen_ProfileMinter_requireNotStopped();
+    $self'stopped = true;
+    $reply($__gen_String_asComment(__gen_str_441410314()));
+    return (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
+}
+
+((slice, int, int, slice, slice), ()) $__gen_ProfileMinter_receive_comment_6c8f44f45fedb4cdfed4de8db14aa5b13ad55d430f759d0669210b74c48fe3df((slice, int, int, slice, slice) $self) impure inline {
+    var ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl) = $self;
+    ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)~$__gen_ProfileMinter_requireOwner();
+    ($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl)~$__gen_ProfileMinter_requireStopped();
+    $self'stopped = false;
+    $reply($__gen_String_asComment(__gen_str_2843554525()));
+    return (($self'owner, $self'stopped, $self'nextItemIndex, $self'collectionContent, $self'profileBaseUrl), ());
+}
+
+((slice, int, int, slice, slice), int) __gen_router_ProfileMinter((slice, int, int, slice, slice) self, int msg_bounced, slice in_msg) impure inline_ref {
     
     ;; Parse incoming message
     int op = 0;
@@ -475,6 +590,23 @@ _ $__gen_get_owner() method_id(83229) {
         return (self, true);
     }
     
+    ;; Text Receivers
+    if (op == 0) {
+        var text_op = slice_hash(in_msg);
+        
+        ;; Receive "Stop" message
+        if (text_op == 0xbcfaf776907c719cc8d379d8f194aaaa27e8ca2871cd591781721f215a454501) {
+            self~$__gen_ProfileMinter_receive_comment_bcfaf776907c719cc8d379d8f194aaaa27e8ca2871cd591781721f215a454501();
+            return (self, true);
+        }
+        
+        ;; Receive "Resume" message
+        if (text_op == 0x6c8f44f45fedb4cdfed4de8db14aa5b13ad55d430f759d0669210b74c48fe3df) {
+            self~$__gen_ProfileMinter_receive_comment_6c8f44f45fedb4cdfed4de8db14aa5b13ad55d430f759d0669210b74c48fe3df();
+            return (self, true);
+        }
+    }
+    
     return (self, false);
 }
 
@@ -508,12 +640,14 @@ _ supported_interfaces() method_id {
         "org.ton.deploy.lazy.v0"H >> 128,
         "org.ton.debug.v0"H >> 128,
         "org.ton.chain.workchain.v0"H >> 128,
-        "org.ton.ownable"H >> 128
+        "org.ton.ownable"H >> 128,
+        "org.ton.stoppable"H >> 128,
+        "org.ton.resumable"H >> 128
     );
 }
 
 _ get_abi_ipfs() {
-    return "ipfs://QmfVDjzLKWKEDAHNWVYYRWQT81QrhuawaGMzdaYnqzYcxb";
+    return "ipfs://QmbNG7pPAoqPAkMZ41pQbHsi6szyXMY3wsfD1HrZ269i5c";
 }
 
 _ lazy_deployment_completed() {

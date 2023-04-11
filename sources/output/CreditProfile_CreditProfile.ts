@@ -1242,7 +1242,9 @@ const CreditProfile_errors: { [key: number]: { message: string } } = {
     10990: { message: `Already revoked` },
     23129: { message: `Authority only` },
     40129: { message: `Only collection contract can initialize` },
+    40368: { message: `Contract stopped` },
     46880: { message: `Value should be greater than 2x forwardFee` },
+    53296: { message: `Contract not stopped` },
     58772: { message: `only owner` },
 }
 

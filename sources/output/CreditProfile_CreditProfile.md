@@ -135,5 +135,7 @@ Total Get Methods: 3
 10990: Already revoked
 23129: Authority only
 40129: Only collection contract can initialize
+40368: Contract stopped
 46880: Value should be greater than 2x forwardFee
+53296: Contract not stopped
 58772: only owner
